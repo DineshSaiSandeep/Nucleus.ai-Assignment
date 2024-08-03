@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { KeyboardEvent, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
-import { MessageCircle, MessageCircleMore, Send } from "lucide-react";
+import { MessageCircleMore, Send } from "lucide-react";
 
 // Define the structure of a message
 type Message = {
@@ -35,16 +35,19 @@ export default function Component() {
   const [input, setInput] = useState<string>("");
 
   // Function to send a message
-  const sendMessage = (event?: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const sendMessage = (event?: KeyboardEvent<HTMLTextAreaElement>): void => {
     if (input.trim()) {
       // Add user message to the chat
-      const newMessages = [...messages, { type: "user", text: input }];
+      const newMessages: Message[] = [
+        ...messages,
+        { type: "user", text: input },
+      ];
       setMessages(newMessages);
       setInput("");
 
       // Simulate system response after a short delay
       setTimeout(() => {
-        const response = {
+        const response: Message = {
           type: "system",
           text: "This is a **dummy response** rendered as markdown.",
         };
