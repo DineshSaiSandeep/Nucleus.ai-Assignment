@@ -9,7 +9,6 @@ import {
   TooltipProvider,
 } from "@/components/ui/tooltip";
 import ReactMarkdown from "react-markdown";
-import Link from "next/link";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -20,7 +19,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
-import { MessageCircleMore, Send } from "lucide-react";
+import { MessageCircleMore, Send, Moon, Sun } from "lucide-react";
+import { useTheme } from "next-themes";
 
 // Define the structure of a message
 type Message = {
@@ -28,11 +28,28 @@ type Message = {
   text: string;
 };
 
+// Define the structure of a history item
+type HistoryItem = {
+  question: string;
+  timestamp: string;
+};
+
 export default function Component() {
   // State to store chat messages
   const [messages, setMessages] = useState<Message[]>([]);
   // State to store the current input text
   const [input, setInput] = useState<string>("");
+  // State to store chat history (static for this example)
+  const [history] = useState<HistoryItem[]>([
+    { question: "How does AI work?", timestamp: "2024-08-05 10:30" },
+    { question: "What is machine learning?", timestamp: "2024-08-05 11:45" },
+    {
+      question: "Explain natural language processing",
+      timestamp: "2024-08-05 14:20",
+    },
+  ]);
+  // Hook to manage theme
+  const { setTheme } = useTheme();
 
   // Function to send a message
   const sendMessage = (event?: KeyboardEvent<HTMLTextAreaElement>): void => {
@@ -72,125 +89,76 @@ export default function Component() {
       <header className="sticky top-0 z-10 flex h-14 items-center justify-between border-b bg-background px-4 shadow-sm sm:h-16 sm:px-6">
         {/* App title */}
         <div className="flex items-center">
-          {/* <MessageCircle className="h-6 w-6 mx-2 text-primary" /> */}
           <MessageCircleMore
             strokeWidth={2.25}
             className="h-6 w-6 mx-2 text-primary"
           />
-          <h1 className="text-lg font-semibold">Chat Interface</h1>
+          <h1 className="text-lg font-semibold">AI Chat Interface</h1>
         </div>
 
-        {/* Navigation links */}
-        <nav className="hidden items-center gap-4 text-sm font-medium sm:flex">
-          <Link
-            href="#"
-            className="rounded-md px-3 py-2 transition-colors hover:bg-muted hover:text-foreground hover:shadow-md"
-            prefetch={false}
-          >
-            Profile
-          </Link>
-          <Link
-            href="#"
-            className="rounded-md px-3 py-2 transition-colors hover:bg-muted hover:text-foreground hover:shadow-md"
-            prefetch={false}
-          >
-            Messages
-          </Link>
-          <Link
-            href="#"
-            className="rounded-md px-3 py-2 transition-colors hover:bg-muted hover:text-foreground hover:shadow-md"
-            prefetch={false}
-          >
-            Stories
-          </Link>
-          <Link
-            href="#"
-            className="rounded-md px-3 py-2 transition-colors hover:bg-muted hover:text-foreground hover:shadow-md"
-            prefetch={false}
-          >
-            Calls
-          </Link>
-        </nav>
+        {/* Theme toggle and user menu */}
+        <div className="flex items-center">
+          {/* Theme toggle dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="icon">
+                <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+                <span className="sr-only">Toggle theme</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setTheme("light")}>
+                Light
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setTheme("dark")}>
+                Dark
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setTheme("system")}>
+                System
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
-        {/* User dropdown menu */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="rounded-full">
-              <Avatar className="h-8 w-8">
-                <AvatarImage src="/4.png" alt="Avatar" />
-                <AvatarFallback>AC</AvatarFallback>
-              </Avatar>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>My Account</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>Settings</DropdownMenuItem>
-            <DropdownMenuItem>Logout</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+          {/* User dropdown menu */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="rounded-full">
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src="/2.png" alt="Avatar" />
+                  <AvatarFallback>AC</AvatarFallback>
+                </Avatar>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>Profile</DropdownMenuItem>
+              <DropdownMenuItem className="sm:hidden">History</DropdownMenuItem>
+              <DropdownMenuItem>Settings</DropdownMenuItem>
+              <DropdownMenuItem>Logout</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </header>
 
       {/* Main content area */}
       <div className="flex flex-1">
-        {/* Sidebar with contact list */}
-        <div className="bg-gray-100 border-r">
+        {/* Sidebar with history (hidden on mobile) */}
+        <div className="hidden sm:block bg-gray-100 dark:bg-gray-800 border-r w-64">
           <nav className="flex flex-col gap-1 p-4">
-            {/* Contact items with tooltips */}
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Link
-                    href="#"
-                    className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-gray-200 hover:text-black"
-                    prefetch={false}
-                  >
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src="/1.png" alt="Avatar" />
-                      <AvatarFallback>AC</AvatarFallback>
-                    </Avatar>
-                    <span className="hidden sm:inline">Amritha</span>
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent>Amritha</TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Link
-                    href="#"
-                    className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-gray-200 hover:text-black"
-                    prefetch={false}
-                  >
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src="/6.png" alt="Avatar" />
-                      <AvatarFallback>AC</AvatarFallback>
-                    </Avatar>
-                    <span className="hidden sm:inline">Avinash</span>
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent>Avinash</TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Link
-                    href="#"
-                    className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-gray-200 hover:text-black"
-                    prefetch={false}
-                  >
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src="/3.png" alt="Avatar" />
-                      <AvatarFallback>AC</AvatarFallback>
-                    </Avatar>
-                    <span className="hidden sm:inline">Shreya</span>
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent>Shreya</TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <h2 className="font-semibold mb-2">Chat History</h2>
+            {history.map((item, index) => (
+              <div
+                key={index}
+                className="text-sm p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded"
+              >
+                <p className="font-medium truncate">{item.question}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  {item.timestamp}
+                </p>
+              </div>
+            ))}
           </nav>
         </div>
 
@@ -209,19 +177,19 @@ export default function Component() {
                   {/* Avatar for system messages */}
                   {msg.type === "system" && (
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src="/5.png" alt="Avatar" />
+                      <AvatarImage src="/1.jpg" alt="Avatar" />
                       <AvatarFallback>AC</AvatarFallback>
                     </Avatar>
                   )}
                   <div className="grid gap-1">
                     <div className="font-medium">
-                      {msg.type === "system" ? "Riya" : "You"}
+                      {msg.type === "system" ? "AI" : "You"}
                     </div>
                     {/* Message bubble */}
                     <div
                       className={`rounded-lg px-4 py-2 shadow-md ${
                         msg.type === "system"
-                          ? "bg-gray-200"
+                          ? "bg-gray-200 dark:bg-gray-700"
                           : "bg-blue-500 text-white"
                       }`}
                     >
@@ -235,7 +203,7 @@ export default function Component() {
                   {/* Avatar for user messages */}
                   {msg.type === "user" && (
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src="/4.png" alt="Avatar" />
+                      <AvatarImage src="/2.png" alt="Avatar" />
                       <AvatarFallback>AC</AvatarFallback>
                     </Avatar>
                   )}
@@ -245,8 +213,8 @@ export default function Component() {
           </div>
 
           {/* Message input area */}
-          <div className="sticky bottom-0 bg-white py-4 shadow-lg">
-            <div className="mx-auto flex max-w-2xl items-center gap-2 bg-gray-100 rounded-full p-2">
+          <div className="sticky bottom-0 bg-white dark:bg-gray-900 py-4 shadow-lg">
+            <div className="mx-auto flex max-w-2xl items-center gap-2 bg-gray-100 dark:bg-gray-800 rounded-full p-2">
               <Textarea
                 placeholder="Type your message... (Press Enter to send, Shift+Enter for new line)"
                 className="h-10 mx-2 flex-1 resize-none rounded-full border-none bg-transparent px-4 py-2 mx-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
